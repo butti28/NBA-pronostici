@@ -5,16 +5,47 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 from sklearn.linear_model import LogisticRegression
 
-st.set_page_config(page_title="Pronostici NBA", layout="centered")
-st.title("Pronostici NBA di oggi")
+st.set_page_config(page_title="Pronostici NBA", page_icon="🏀", layout="centered")
+
+st.markdown(
+    """
+    <style>
+    .stApp {
+        background: linear-gradient(180deg, #17408B 0%, #1d4f9f 35%, #c9803a 100%);
+    }
+    h1, h2, h3, .stMarkdown, p, label, span, div {
+        color: #ffffff;
+    }
+    h1 {
+        text-align: center;
+        text-shadow: 2px 2px 0 #C9082A;
+        letter-spacing: 1px;
+    }
+    [data-testid="stExpander"] {
+        background: rgba(255, 255, 255, 0.12);
+        border: 2px solid #F58426;
+        border-radius: 14px;
+    }
+    [data-testid="stExpander"] summary {
+        font-weight: 700;
+    }
+    [data-testid="stMetricValue"] {
+        color: #FFD27A;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+st.title("🏀 Pronostici NBA di oggi")
 st.caption("Stime statistiche indicative. Non garantiscono vincite. Controlla sempre gli infortuni.")
 
-BASE = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard"
+BASE = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba"
 GIORNI_STORICO = 120
 
 
 def chiama(data_str):
-    r = requests.get(BASE, params={"dates": data_str, "limit": 100}, timeout=20)
+    r = requests.get(BASE + "/scoreboard", params={"dates": data_str, "limit": 100}, timeout=20)
     r.raise_for_status()
     return r.json().get("events", [])
 
@@ -56,16 +87,16 @@ def tabella_squadre(df):
 
 
 def stato(t, squadra, giorno):
-    r = t[(t["squadra"] == squadra) & (t["data"] < giorno)].tail(10)
+    prec = t[(t["squadra"] == squadra) & (t["data"] < giorno)]
+    r = prec.tail(10)
     if len(r) < 3:
         return None
-    ultima = t[(t["squadra"] == squadra) & (t["data"] < giorno)]["data"].max()
     return {
         "forma": r["vinta"].mean(),
         "fatti": r["fatti"].mean(),
         "subiti": r["subiti"].mean(),
         "diff": r["diff"].mean(),
-        "riposo": min((giorno - ultima).days, 5),
+        "riposo": min((giorno - prec["data"].max()).days, 5),
     }
 
 
@@ -92,6 +123,59 @@ def addestra(fine_str, giorni):
     return m
 
 
+@st.cache_data(ttl=6 * 3600, show_spinner=False)
+def leader_squadra(team_id):
+    """Restituisce i primi tre di squadra per punti, rimbalzi e assist."""
+    risultato = {"points": [], "rebounds": [], "assists": []}
+    try:
+        r = requests.get(f"{BASE}/teams/{team_id}/leaders", timeout=20)
+        r.raise_for_status()
+        dati = r.json()
+        categorie = dati.get("leaders", {}).get("categories", []) or dati.get("categories", [])
+        for cat in categorie:
+            nome = cat.get("name", "")
+            chiave = None
+            if "pointsPerGame" in nome or nome == "points":
+                chiave = "points"
+            elif "reboundsPerGame" in nome or nome == "rebounds":
+                chiave = "rebounds"
+            elif "assistsPerGame" in nome or nome == "assists":
+                chiave = "assists"
+            if chiave:
+                for x in cat.get("leaders", [])[:3]:
+                    atleta = x.get("athlete", {}).get("displayName", "n.d.")
+                    risultato[chiave].append((atleta, x.get("displayValue", "")))
+    except Exception:
+        pass
+    return risultato
+
+
+def leader_dalla_partita(competitor):
+    """Piano B: i leader già presenti nei dati della partita."""
+    risultato = {"points": [], "rebounds": [], "assists": []}
+    for cat in competitor.get("leaders", []) or []:
+        nome = cat.get("name", "")
+        chiave = {"points": "points", "pointsPerGame": "points", "rebounds": "rebounds",
+                  "reboundsPerGame": "rebounds", "assists": "assists", "assistsPerGame": "assists"}.get(nome)
+        if chiave:
+            for x in cat.get("leaders", [])[:3]:
+                atleta = x.get("athlete", {}).get("displayName", "n.d.")
+                risultato[chiave].append((atleta, x.get("displayValue", "")))
+    return risultato
+
+
+def mostra_leader(nome_sq, lead):
+    st.markdown(f"**{nome_sq}**")
+    etichette = {"points": "Punti", "rebounds": "Rimbalzi", "assists": "Assist"}
+    for chiave, etichetta in etichette.items():
+        elenco = lead.get(chiave, [])
+        if elenco:
+            testo = "  |  ".join(f"{n} ({v})" for n, v in elenco)
+            st.write(f"{etichetta}: {testo}")
+        else:
+            st.write(f"{etichetta}: dati non disponibili")
+
+
 oggi = datetime.now(ZoneInfo("America/New_York")).replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=None)
 data_scelta = st.date_input("Giorno", value=oggi.date())
 giorno = datetime(data_scelta.year, data_scelta.month, data_scelta.day)
@@ -115,7 +199,7 @@ if modello is None or df_storico.empty:
     st.stop()
 
 tab = tabella_squadre(df_storico)
-st.subheader(f"{len(eventi)} partite")
+st.subheader(f"🏀 {len(eventi)} partite")
 
 for e in eventi:
     comp = e["competitions"][0]
@@ -135,7 +219,7 @@ for e in eventi:
     fav = casa if p_casa >= 0.5 else trasf
     p_fav = max(p_casa, 1 - p_casa)
 
-    with st.expander(f"{trasf} @ {casa}  |  {stato_gara}  |  Pronostico: {fav} {p_fav * 100:.0f}%"):
+    with st.expander(f"🏀 {trasf} @ {casa}  |  {stato_gara}  |  Pronostico: {fav} {p_fav * 100:.0f}%"):
         k1, k2 = st.columns(2)
         k1.metric(casa + " (casa)", f"{p_casa * 100:.1f}%")
         k2.metric(trasf + " (trasferta)", f"{(1 - p_casa) * 100:.1f}%")
@@ -155,15 +239,17 @@ for e in eventi:
             if q.get("overUnder"):
                 st.write(f"Totale punti (over/under): {q['overUnder']}")
                 diff = (pc + pt) - float(q["overUnder"])
-                st.write(f"Il modello stima {abs(diff):.0f} punti in {'più' if diff > 0 else 'meno'} rispetto alla linea.")
+                verso = "più" if diff > 0 else "meno"
+                st.write(f"Il modello stima {abs(diff):.0f} punti in {verso} rispetto alla linea.")
         else:
             st.caption("Quote non disponibili per questa partita.")
 
-        for nome, s in [(casa, a), (trasf, b)]:
-            leader = next((x for x in next(y for y in sq if y['team']['displayName'] == nome).get('leaders', []) if x.get('name') == 'points'), None)
-            if leader and leader.get('leaders'):
-                gl = leader['leaders'][0]
-                st.write(f"Miglior marcatore {nome}: {gl['athlete']['displayName']}, {gl.get('displayValue', '')}")
+        st.markdown("### 🔥 Giocatori da seguire")
+        for comp_sq, nome_sq in [(c, casa), (t_, trasf)]:
+            lead = leader_squadra(comp_sq["team"]["id"])
+            if not any(lead.values()):
+                lead = leader_dalla_partita(comp_sq)
+            mostra_leader(nome_sq, lead)
 
         st.markdown("**Forma recente (ultime 10)**")
         st.write(f"{casa}: {a['forma'] * 10:.0f} vittorie su 10, riposo {a['riposo']} giorni")
