@@ -114,3 +114,4 @@ if st.button("Calcola pronostico"):
             "Gioca solo se la quota del bookmaker è più alta della quota equa. "
             "Controlla sempre gli infortuni prima di giocare."
         )
+        
