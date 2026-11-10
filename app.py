@@ -1,155 +1,169 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime
+import requests
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
-from nba_api.stats.endpoints import leaguegamelog, scoreboardv2, playergamelog
-from nba_api.stats.static import teams
 from sklearn.linear_model import LogisticRegression
 
 st.set_page_config(page_title="Pronostici NBA", layout="centered")
 st.title("Pronostici NBA di oggi")
 st.caption("Stime statistiche indicative. Non garantiscono vincite. Controlla sempre gli infortuni.")
 
-STAGIONI_ADDESTRAMENTO = ["2023-24", "2024-25"]
-STAGIONE_CORRENTE = "2025-26"
-elenco = teams.get_teams()
-nome_da_id = {t["id"]: t["full_name"] for t in elenco}
+BASE = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard"
+GIORNI_STORICO = 120
 
 
-@st.cache_data(ttl=3600)
-def scarica_partite(stagione):
-    log = leaguegamelog.LeagueGameLog(
-        season=stagione, season_type_all_star="Regular Season"
-    )
-    df = log.get_data_frames()[0]
-    df["GAME_DATE"] = pd.to_datetime(df["GAME_DATE"])
-    df["VITTORIA"] = (df["WL"] == "W").astype(int)
-    return df
+def chiama(data_str):
+    r = requests.get(BASE, params={"dates": data_str, "limit": 100}, timeout=20)
+    r.raise_for_status()
+    return r.json().get("events", [])
 
 
-def prepara_dati(df):
-    df = df.sort_values(["TEAM_ID", "GAME_DATE"]).copy()
-    df["CASA"] = (~df["MATCHUP"].str.contains("@")).astype(int)
-    g = df.groupby("TEAM_ID")
-    df["FORMA"] = g["VITTORIA"].transform(lambda s: s.shift().rolling(10, min_periods=3).mean())
-    df["PUNTI"] = g["PTS"].transform(lambda s: s.shift().rolling(10, min_periods=3).mean())
-    df["DIFF"] = g["PLUS_MINUS"].transform(lambda s: s.shift().rolling(10, min_periods=3).mean())
-    df["RIPOSO"] = g["GAME_DATE"].diff().dt.days.clip(upper=5).fillna(3)
-    return df.dropna(subset=["FORMA", "PUNTI", "DIFF"])
+@st.cache_data(ttl=6 * 3600, show_spinner=False)
+def storico(fine_str, giorni):
+    fine = datetime.strptime(fine_str, "%Y%m%d")
+    righe = []
+    for i in range(1, giorni + 1):
+        giorno = fine - timedelta(days=i)
+        try:
+            eventi = chiama(giorno.strftime("%Y%m%d"))
+        except Exception:
+            continue
+        for e in eventi:
+            comp = e["competitions"][0]
+            if not comp["status"]["type"].get("completed"):
+                continue
+            sq = comp["competitors"]
+            casa = next(c for c in sq if c["homeAway"] == "home")
+            trasf = next(c for c in sq if c["homeAway"] == "away")
+            righe.append({
+                "data": giorno,
+                "casa": casa["team"]["displayName"],
+                "trasf": trasf["team"]["displayName"],
+                "p_casa": float(casa["score"]),
+                "p_trasf": float(trasf["score"]),
+            })
+    return pd.DataFrame(righe)
 
 
-@st.cache_resource
-def addestra_modello():
-    pezzi = [prepara_dati(scarica_partite(s)) for s in STAGIONI_ADDESTRAMENTO]
-    df = pd.concat(pezzi)
-    m = df[df["CASA"] == 1].merge(df[df["CASA"] == 0], on="GAME_ID", suffixes=("_c", "_t"))
-    X = pd.DataFrame({
-        "forma": m["FORMA_c"] - m["FORMA_t"],
-        "punti": m["PUNTI_c"] - m["PUNTI_t"],
-        "diff": m["DIFF_c"] - m["DIFF_t"],
-        "riposo": m["RIPOSO_c"] - m["RIPOSO_t"],
-    })
-    modello = LogisticRegression(max_iter=1000)
-    modello.fit(X, m["VITTORIA_c"])
-    return modello
+def tabella_squadre(df):
+    a = df.rename(columns={"casa": "squadra", "p_casa": "fatti", "p_trasf": "subiti"})[["data", "squadra", "fatti", "subiti"]]
+    b = df.rename(columns={"trasf": "squadra", "p_trasf": "fatti", "p_casa": "subiti"})[["data", "squadra", "fatti", "subiti"]]
+    t = pd.concat([a, b]).sort_values(["squadra", "data"]).copy()
+    t["vinta"] = (t["fatti"] > t["subiti"]).astype(int)
+    t["diff"] = t["fatti"] - t["subiti"]
+    return t
 
 
-def stato_squadra(df, team_id, oggi):
-    r = df[df["TEAM_ID"] == team_id].sort_values("GAME_DATE")
-    ultime = r.tail(10)
-    if len(ultime) == 0:
+def stato(t, squadra, giorno):
+    r = t[(t["squadra"] == squadra) & (t["data"] < giorno)].tail(10)
+    if len(r) < 3:
         return None
-    riposo = min((oggi - r["GAME_DATE"].max()).days, 5)
+    ultima = t[(t["squadra"] == squadra) & (t["data"] < giorno)]["data"].max()
     return {
-        "forma": ultime["VITTORIA"].mean(),
-        "punti": ultime["PTS"].mean(),
-        "subiti": (ultime["PTS"] - ultime["PLUS_MINUS"]).mean(),
-        "diff": ultime["PLUS_MINUS"].mean(),
-        "riposo": riposo,
+        "forma": r["vinta"].mean(),
+        "fatti": r["fatti"].mean(),
+        "subiti": r["subiti"].mean(),
+        "diff": r["diff"].mean(),
+        "riposo": min((giorno - ultima).days, 5),
     }
 
 
-@st.cache_data(ttl=600)
-def partite_di_oggi(data_str):
-    sb = scoreboardv2.ScoreboardV2(game_date=data_str)
-    return sb.get_data_frames()[0]
+def vettore(a, b):
+    return [a["forma"] - b["forma"], a["fatti"] - b["fatti"], a["diff"] - b["diff"], a["riposo"] - b["riposo"]]
 
 
-@st.cache_data(ttl=3600)
-def miglior_marcatore(team_id):
-    try:
-        log = leaguegamelog.LeagueGameLog(
-            season=STAGIONE_CORRENTE,
-            season_type_all_star="Regular Season",
-            player_or_team_abbreviation="P",
-        ).get_data_frames()[0]
-        sq = log[log["TEAM_ID"] == team_id].sort_values("GAME_DATE")
-        ultime_date = sq["GAME_DATE"].drop_duplicates().tail(10)
-        sq = sq[sq["GAME_DATE"].isin(ultime_date)]
-        medie = sq.groupby("PLAYER_NAME")["PTS"].agg(["mean", "count"])
-        medie = medie[medie["count"] >= 5].sort_values("mean", ascending=False)
-        return medie.index[0], float(medie.iloc[0]["mean"])
-    except Exception:
-        return None, None
+@st.cache_resource(show_spinner=False)
+def addestra(fine_str, giorni):
+    df = storico(fine_str, giorni)
+    if df.empty or len(df) < 80:
+        return None
+    t = tabella_squadre(df)
+    X, y = [], []
+    for _, g in df.iterrows():
+        a, b = stato(t, g["casa"], g["data"]), stato(t, g["trasf"], g["data"])
+        if a and b:
+            X.append(vettore(a, b))
+            y.append(int(g["p_casa"] > g["p_trasf"]))
+    if len(X) < 60:
+        return None
+    m = LogisticRegression(max_iter=1000)
+    m.fit(X, y)
+    return m
 
 
-oggi_it = datetime.now(ZoneInfo("America/New_York"))
-data_scelta = st.date_input("Giorno", value=oggi_it.date())
-data_str = data_scelta.strftime("%m/%d/%Y")
+oggi = datetime.now(ZoneInfo("America/New_York")).replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=None)
+data_scelta = st.date_input("Giorno", value=oggi.date())
+giorno = datetime(data_scelta.year, data_scelta.month, data_scelta.day)
+giorno_str = giorno.strftime("%Y%m%d")
 
-with st.spinner("Carico calendario e statistiche..."):
-    try:
-        calendario = partite_di_oggi(data_str)
-        modello = addestra_modello()
-        dati = scarica_partite(STAGIONE_CORRENTE)
-    except Exception as e:
-        st.error("Non riesco a scaricare i dati NBA in questo momento. Riprova tra poco.")
-        st.stop()
-
-if calendario.empty:
-    st.info("Nessuna partita NBA in questa data.")
+try:
+    with st.spinner("Carico calendario e statistiche (la prima volta ci vuole un po')..."):
+        eventi = chiama(giorno_str)
+        df_storico = storico(giorno_str, GIORNI_STORICO)
+        modello = addestra(giorno_str, GIORNI_STORICO)
+except Exception as e:
+    st.error("Non riesco a scaricare i dati in questo momento. Riprova tra poco.")
+    st.caption(f"Dettaglio tecnico: {e}")
     st.stop()
 
-data_ts = pd.Timestamp(data_scelta)
-st.subheader(f"{len(calendario)} partite")
+if not eventi:
+    st.info("Nessuna partita NBA in questa data.")
+    st.stop()
+if modello is None or df_storico.empty:
+    st.warning("Dati storici insufficienti per calcolare i pronostici.")
+    st.stop()
 
-for _, p in calendario.iterrows():
-    id_casa, id_trasf = int(p["HOME_TEAM_ID"]), int(p["VISITOR_TEAM_ID"])
-    casa, trasf = nome_da_id[id_casa], nome_da_id[id_trasf]
-    a, b = stato_squadra(dati, id_casa, data_ts), stato_squadra(dati, id_trasf, data_ts)
-    orario = p.get("GAME_STATUS_TEXT", "")
+tab = tabella_squadre(df_storico)
+st.subheader(f"{len(eventi)} partite")
 
-    if a is None or b is None:
-        with st.expander(f"{trasf} @ {casa}  {orario}"):
+for e in eventi:
+    comp = e["competitions"][0]
+    sq = comp["competitors"]
+    c = next(x for x in sq if x["homeAway"] == "home")
+    t_ = next(x for x in sq if x["homeAway"] == "away")
+    casa, trasf = c["team"]["displayName"], t_["team"]["displayName"]
+    stato_gara = comp["status"]["type"].get("shortDetail", "")
+    a, b = stato(tab, casa, giorno), stato(tab, trasf, giorno)
+
+    if not a or not b:
+        with st.expander(f"{trasf} @ {casa}  |  {stato_gara}"):
             st.write("Dati insufficienti per questa partita.")
         continue
 
-    x = pd.DataFrame([{
-        "forma": a["forma"] - b["forma"],
-        "punti": a["punti"] - b["punti"],
-        "diff": a["diff"] - b["diff"],
-        "riposo": a["riposo"] - b["riposo"],
-    }])
-    p_casa = float(modello.predict_proba(x)[0][1])
-    favorita = casa if p_casa >= 0.5 else trasf
+    p_casa = float(modello.predict_proba([vettore(a, b)])[0][1])
+    fav = casa if p_casa >= 0.5 else trasf
     p_fav = max(p_casa, 1 - p_casa)
 
-    titolo = f"{trasf} @ {casa}  |  {orario}  |  Favorita: {favorita} {p_fav * 100:.0f}%"
-    with st.expander(titolo):
-        c1, c2 = st.columns(2)
-        c1.metric(casa + " (casa)", f"{p_casa * 100:.1f}%")
-        c2.metric(trasf + " (trasferta)", f"{(1 - p_casa) * 100:.1f}%")
-        st.write(f"Quota equa {casa}: {1 / p_casa:.2f}   |   Quota equa {trasf}: {1 / (1 - p_casa):.2f}")
+    with st.expander(f"{trasf} @ {casa}  |  {stato_gara}  |  Pronostico: {fav} {p_fav * 100:.0f}%"):
+        k1, k2 = st.columns(2)
+        k1.metric(casa + " (casa)", f"{p_casa * 100:.1f}%")
+        k2.metric(trasf + " (trasferta)", f"{(1 - p_casa) * 100:.1f}%")
+        st.write(f"Quota equa {casa}: {1 / p_casa:.2f}  |  {trasf}: {1 / (1 - p_casa):.2f}")
 
-        tot = (a["punti"] + b["subiti"]) / 2 + (b["punti"] + a["subiti"]) / 2
-        st.write(f"Punti totali stimati: circa {tot:.0f}")
-        st.write(f"Punti stimati {casa}: {(a['punti'] + b['subiti']) / 2:.0f}  |  {trasf}: {(b['punti'] + a['subiti']) / 2:.0f}")
+        pc = (a["fatti"] + b["subiti"]) / 2
+        pt = (b["fatti"] + a["subiti"]) / 2
+        st.write(f"Punti stimati: {casa} {pc:.0f}  |  {trasf} {pt:.0f}  |  Totale circa {pc + pt:.0f}")
 
-        st.markdown("**Miglior marcatore recente**")
-        for nome_sq, tid in [(casa, id_casa), (trasf, id_trasf)]:
-            gioc, media = miglior_marcatore(tid)
-            if gioc:
-                st.write(f"{nome_sq}: {gioc}, media {media:.1f} punti nelle ultime partite")
+        quote = comp.get("odds")
+        if quote:
+            q = quote[0]
+            st.markdown("**Quote del bookmaker (ESPN)**")
+            st.write(f"Fornitore: {q.get('provider', {}).get('name', 'n.d.')}")
+            if q.get("details"):
+                st.write(f"Handicap: {q['details']}")
+            if q.get("overUnder"):
+                st.write(f"Totale punti (over/under): {q['overUnder']}")
+                diff = (pc + pt) - float(q["overUnder"])
+                st.write(f"Il modello stima {abs(diff):.0f} punti in {'più' if diff > 0 else 'meno'} rispetto alla linea.")
+        else:
+            st.caption("Quote non disponibili per questa partita.")
+
+        for nome, s in [(casa, a), (trasf, b)]:
+            leader = next((x for x in next(y for y in sq if y['team']['displayName'] == nome).get('leaders', []) if x.get('name') == 'points'), None)
+            if leader and leader.get('leaders'):
+                gl = leader['leaders'][0]
+                st.write(f"Miglior marcatore {nome}: {gl['athlete']['displayName']}, {gl.get('displayValue', '')}")
 
         st.markdown("**Forma recente (ultime 10)**")
         st.write(f"{casa}: {a['forma'] * 10:.0f} vittorie su 10, riposo {a['riposo']} giorni")
