@@ -89,12 +89,15 @@ def previsione(forza, casa, trasf):
         return None
     media_c, media_t, squadre = forza
     a, b = squadre.get(casa), squadre.get(trasf)
-    if not a or not b or a["cn"] < 2 or b["tn"] < 2:
+    if not a or not b or a["cn"] + a["tn"] < 2 or b["cn"] + b["tn"] < 2:
         return None
-    att_c = (a["cf"] / a["cn"]) / media_c
-    dif_c = (a["cs"] / a["cn"]) / media_t
-    att_t = (b["tf"] / b["tn"]) / media_t
-    dif_t = (b["ts"] / b["tn"]) / media_c
+    davanti.
+    cn_a, tn_a = max(a["cn"], 1), max(a["tn"], 1)
+    cn_b, tn_b = max(b["cn"], 1), max(b["tn"], 1)
+    att_c = ((a["cf"] + a["tf"]) / max(a["cn"] + a["tn"], 1)) / ((media_c + media_t) / 2)
+    dif_c = ((a["cs"] + a["ts"]) / max(a["cn"] + a["tn"], 1)) / ((media_c + media_t) / 2)
+    att_t = ((b["cf"] + b["tf"]) / max(b["cn"] + b["tn"], 1)) / ((media_c + media_t) / 2)
+    dif_t = ((b["cs"] + b["ts"]) / max(b["cn"] + b["tn"], 1)) / ((media_c + media_t) / 2)
     lam_c = max(0.2, att_c * dif_t * media_c)
     lam_t = max(0.2, att_t * dif_c * media_t)
     p1 = px = p2 = 0.0
