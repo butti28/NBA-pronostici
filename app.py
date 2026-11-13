@@ -147,7 +147,7 @@ def addestra(fine_str, giorni):
     m = LogisticRegression(max_iter=1000)
     m.fit(X, y)
     return m
-    @st.cache_data(ttl=6 * 3600, show_spinner=False)
+@st.cache_data(ttl=6 * 3600, show_spinner=False)
 def leader_squadra(team_id):
     risultato = {"points": [], "rebounds": [], "assists": []}
     try:
