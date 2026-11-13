@@ -21,7 +21,7 @@ CAMPIONATI = {
     "Amichevoli (nazionali)": "fifa.friendly",
 }
 
-GIORNI_STORICO = 90
+GIORNI_STORICO = 400
 
 
 def chiama(lega, data_str):
