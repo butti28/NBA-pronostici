@@ -127,6 +127,38 @@
   "giocatori": {
    "Tyrese Maxey": 27.0,
    "RJ Barrett": 31.0
+  },
+  "risultato": {
+   "punteggi": {
+    "Philadelphia 76ers": 123.0,
+    "Toronto Raptors": 112.0
+   },
+   "giocatori": {
+    "RJ Barrett": 31.0,
+    "Collin Murray-Boyles": 14.0,
+    "Jakob Poeltl": 9.0,
+    "Immanuel Quickley": 26.0,
+    "Ja'Kobe Walter": 6.0,
+    "Kyle Anderson": 0.0,
+    "Jamison Battle": 13.0,
+    "Allen Graves": 0.0,
+    "Malachi Smith": 0.0,
+    "Jamal Shead": 5.0,
+    "Jaden Bradley": 1.0,
+    "Alijah Martin": 7.0,
+    "Dean Wade": 6.0,
+    "Joel Embiid": 20.0,
+    "Jaylen Brown": 18.0,
+    "Tyrese Maxey": 27.0,
+    "VJ Edgecombe": 15.0,
+    "Jabari Walker": 9.0,
+    "Justin Edwards": 0.0,
+    "Tacko Fall": 0.0,
+    "Kentavious Caldwell-Pope": 11.0,
+    "Anfernee Simons": 17.0,
+    "Caleb Love": 0.0,
+    "Labaron Philon Jr.": 0.0
+   }
   }
  },
  "401909977": {
@@ -140,6 +172,33 @@
   "giocatori": {
    "Trae Young": 37.0,
    "Cade Cunningham": 52.0
+  },
+  "risultato": {
+   "punteggi": {
+    "Washington Wizards": 140.0,
+    "Detroit Pistons": 144.0
+   },
+   "giocatori": {
+    "Duncan Robinson": 13.0,
+    "John Collins": 10.0,
+    "Cade Cunningham": 52.0,
+    "Ausar Thompson": 17.0,
+    "Daniss Jenkins": 21.0,
+    "Paul Reed": 13.0,
+    "Ronald Holland II": 2.0,
+    "Javonte Green": 5.0,
+    "Kevin Huerter": 11.0,
+    "Anthony Davis": 30.0,
+    "AJ Dybantsa": 5.0,
+    "Kyshawn George": 14.0,
+    "Alex Sarr": 30.0,
+    "Trae Young": 37.0,
+    "Deandre Ayton": 2.0,
+    "Bub Carrington": 2.0,
+    "Bilal Coulibaly": 4.0,
+    "Will Riley": 3.0,
+    "Tre Johnson": 13.0
+   }
   }
  },
  "401909978": {
@@ -153,6 +212,41 @@
   "giocatori": {
    "Bones Hyland": 24.0,
    "Zaccharie Risacher": 22.0
+  },
+  "risultato": {
+   "punteggi": {
+    "Minnesota Timberwolves": 133.0,
+    "Dallas Mavericks": 94.0
+   },
+   "giocatori": {
+    "Caleb Martin": 7.0,
+    "Daniel Gafford": 3.0,
+    "P.J. Washington": 10.0,
+    "Cooper Flagg": 12.0,
+    "Kyrie Irving": 10.0,
+    "Naji Marshall": 13.0,
+    "Santi Aldama": 3.0,
+    "Morez Johnson Jr.": 0.0,
+    "Tobi Lawal": 0.0,
+    "Zaccharie Risacher": 22.0,
+    "Moussa Cisse": 0.0,
+    "Marcus Sasser": 3.0,
+    "Max Christie": 3.0,
+    "Walter Clayton Jr.": 5.0,
+    "Jett Howard": 3.0,
+    "Jaden McDaniels": 16.0,
+    "Jonathan Kuminga": 14.0,
+    "Rudy Gobert": 9.0,
+    "Ayo Dosunmu": 18.0,
+    "LaMelo Ball": 22.0,
+    "Trey Lyles": 2.0,
+    "Cody Williams": 0.0,
+    "Isaiah Evans": 2.0,
+    "Joan Beringer": 13.0,
+    "Jaylen Clark": 7.0,
+    "Terrence Shannon Jr.": 6.0,
+    "Bones Hyland": 24.0
+   }
   }
  },
  "401909979": {
@@ -166,6 +260,34 @@
   "giocatori": {
    "Devin Booker": 30.0,
    "Coby White": 21.0
+  },
+  "risultato": {
+   "punteggi": {
+    "Phoenix Suns": 101.0,
+    "Charlotte Hornets": 96.0
+   },
+   "giocatori": {
+    "Moussa Diabate": 7.0,
+    "Naz Reid": 16.0,
+    "Grayson Allen": 14.0,
+    "Coby White": 21.0,
+    "Sion James": 3.0,
+    "Royce O'Neale": 7.0,
+    "Grant Williams": 11.0,
+    "Tidjane Salaun": 2.0,
+    "Ryan Kalkbrenner": 2.0,
+    "Christian Anderson": 13.0,
+    "Dillon Brooks": 15.0,
+    "Miles Bridges": 11.0,
+    "Oso Ighodaro": 2.0,
+    "Devin Booker": 30.0,
+    "Jalen Green": 12.0,
+    "Ryan Dunn": 0.0,
+    "Khaman Maluach": 4.0,
+    "Luke Kennard": 8.0,
+    "Jordan Goodwin": 6.0,
+    "Collin Gillespie": 13.0
+   }
   }
  }
 }
