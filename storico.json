@@ -115,5 +115,57 @@
    "Darius Garland": 20.4,
    "Shai Gilgeous-Alexander": 29.7
   }
+ },
+ "401909976": {
+  "data": "2026-11-12",
+  "casa": "Philadelphia 76ers",
+  "trasf": "Toronto Raptors",
+  "favorita": "Philadelphia 76ers",
+  "prob": 0.605,
+  "punti_casa": 112.0,
+  "punti_trasf": 111.4,
+  "giocatori": {
+   "Tyrese Maxey": 27.0,
+   "RJ Barrett": 31.0
+  }
+ },
+ "401909977": {
+  "data": "2026-11-12",
+  "casa": "Washington Wizards",
+  "trasf": "Detroit Pistons",
+  "favorita": "Detroit Pistons",
+  "prob": 0.67,
+  "punti_casa": 105.3,
+  "punti_trasf": 113.0,
+  "giocatori": {
+   "Trae Young": 37.0,
+   "Cade Cunningham": 52.0
+  }
+ },
+ "401909978": {
+  "data": "2026-11-12",
+  "casa": "Minnesota Timberwolves",
+  "trasf": "Dallas Mavericks",
+  "favorita": "Minnesota Timberwolves",
+  "prob": 0.549,
+  "punti_casa": 112.6,
+  "punti_trasf": 111.2,
+  "giocatori": {
+   "Bones Hyland": 24.0,
+   "Zaccharie Risacher": 22.0
+  }
+ },
+ "401909979": {
+  "data": "2026-11-12",
+  "casa": "Phoenix Suns",
+  "trasf": "Charlotte Hornets",
+  "favorita": "Phoenix Suns",
+  "prob": 0.522,
+  "punti_casa": 112.0,
+  "punti_trasf": 107.9,
+  "giocatori": {
+   "Devin Booker": 30.0,
+   "Coby White": 21.0
+  }
  }
 }
