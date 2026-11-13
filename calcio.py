@@ -176,7 +176,7 @@ def cartellini_medi(lega, fine_str, giorni):
             t[0] += gialli
             t[1] += 1
     return {n: (v[0] / v[1]) for n, v in totali.items() if v[1] >= 2}
-  def mostra_calcio():
+def mostra_calcio():
     st.subheader("⚽ Pronostici Calcio")
     st.caption("Stime statistiche indicative, soprattutto per risultato esatto, marcatori e cartellini. Non garantiscono vincite.")
 
