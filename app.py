@@ -436,3 +436,7 @@ else:
                         st.write(f"{nome}: previsti {prev:.1f}  |  reali {gioc[nome]:.0f}  |  differenza {gioc[nome] - prev:+.1f}")
                     else:
                         st.write(f"{nome}: previsti {prev:.1f}  |  non ha giocato")
+st.divider()
+if st.toggle("⚽ Apri la sezione Calcio"):
+    from calcio import mostra_calcio
+    mostra_calcio()
