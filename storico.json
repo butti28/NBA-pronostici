@@ -1,0 +1,119 @@
+{
+ "401909296": {
+  "data": "2026-11-13",
+  "casa": "Indiana Pacers",
+  "trasf": "New York Knicks",
+  "favorita": "New York Knicks",
+  "prob": 0.653,
+  "punti_casa": 107.2,
+  "punti_trasf": 112.0,
+  "giocatori": {
+   "Pascal Siakam": 22.7,
+   "Jalen Brunson": 26.0
+  }
+ },
+ "401909297": {
+  "data": "2026-11-13",
+  "casa": "Orlando Magic",
+  "trasf": "Milwaukee Bucks",
+  "favorita": "Orlando Magic",
+  "prob": 0.702,
+  "punti_casa": 113.2,
+  "punti_trasf": 108.1,
+  "giocatori": {
+   "Franz Wagner": 23.5,
+   "Tyler Herro": 21.9
+  }
+ },
+ "401909298": {
+  "data": "2026-11-13",
+  "casa": "Miami Heat",
+  "trasf": "Cleveland Cavaliers",
+  "favorita": "Cleveland Cavaliers",
+  "prob": 0.547,
+  "punti_casa": 115.2,
+  "punti_trasf": 117.8,
+  "giocatori": {
+   "Giannis Antetokounmpo": 27.7,
+   "Donovan Mitchell": 22.8
+  }
+ },
+ "401909299": {
+  "data": "2026-11-13",
+  "casa": "Chicago Bulls",
+  "trasf": "Atlanta Hawks",
+  "favorita": "Atlanta Hawks",
+  "prob": 0.679,
+  "punti_casa": 116.0,
+  "punti_trasf": 122.4,
+  "giocatori": {
+   "Norman Powell": 19.2,
+   "Nickeil Alexander-Walker": 21.9
+  }
+ },
+ "401909300": {
+  "data": "2026-11-13",
+  "casa": "New Orleans Pelicans",
+  "trasf": "Memphis Grizzlies",
+  "favorita": "Memphis Grizzlies",
+  "prob": 0.678,
+  "punti_casa": 114.6,
+  "punti_trasf": 121.1,
+  "giocatori": {
+   "Zion Williamson": 21.7,
+   "Ty Jerome": 26.2
+  }
+ },
+ "401909301": {
+  "data": "2026-11-13",
+  "casa": "Houston Rockets",
+  "trasf": "Utah Jazz",
+  "favorita": "Houston Rockets",
+  "prob": 0.818,
+  "punti_casa": 115.9,
+  "punti_trasf": 105.7,
+  "giocatori": {
+   "Alperen Sengun": 21.1,
+   "Keyonte George": 20.4
+  }
+ },
+ "401909302": {
+  "data": "2026-11-13",
+  "casa": "San Antonio Spurs",
+  "trasf": "Golden State Warriors",
+  "favorita": "San Antonio Spurs",
+  "prob": 0.616,
+  "punti_casa": 115.8,
+  "punti_trasf": 114.2,
+  "giocatori": {
+   "Victor Wembanyama": 30.2,
+   "Yaxel Lendeborg": 21.7
+  }
+ },
+ "401909303": {
+  "data": "2026-11-13",
+  "casa": "Sacramento Kings",
+  "trasf": "Portland Trail Blazers",
+  "favorita": "Portland Trail Blazers",
+  "prob": 0.693,
+  "punti_casa": 112.4,
+  "punti_trasf": 120.0,
+  "giocatori": {
+   "Darius Acuff Jr.": 26.2,
+   "Deni Avdija": 23.0
+  }
+ },
+ "401909304": {
+  "data": "2026-11-13",
+  "casa": "LA Clippers",
+  "trasf": "Oklahoma City Thunder",
+  "favorita": "Oklahoma City Thunder",
+  "prob": 0.655,
+  "punti_casa": 110.8,
+  "punti_trasf": 115.1,
+  "giocatori": {
+   "Darius Garland": 20.4,
+   "Shai Gilgeous-Alexander": 29.7
+  }
+ }
+}
