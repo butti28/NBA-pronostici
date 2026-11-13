@@ -15,6 +15,8 @@ CAMPIONATI = {
     "Champions League": "uefa.champions",
     "Europa League": "uefa.europa",
     "Coppa Italia": "ita.coppa_italia",
+    "Nations League (nazionali)": "uefa.nations",
+    "Qualificazioni Europee (nazionali)": "uefa.euroq",
     "Mondiali (nazionali)": "fifa.world",
     "Amichevoli (nazionali)": "fifa.friendly",
 }
