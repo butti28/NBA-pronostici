@@ -289,5 +289,135 @@
     "Collin Gillespie": 13.0
    }
   }
+ },
+ "401909966": {
+  "data": "2026-11-11",
+  "casa": "Indiana Pacers",
+  "trasf": "Washington Wizards",
+  "favorita": "Indiana Pacers",
+  "prob": 0.521,
+  "punti_casa": 111.6,
+  "punti_trasf": 110.4,
+  "giocatori": {
+   "Pascal Siakam": 28.0,
+   "Kyshawn George": 25.0
+  }
+ },
+ "401909967": {
+  "data": "2026-11-11",
+  "casa": "New York Knicks",
+  "trasf": "Cleveland Cavaliers",
+  "favorita": "New York Knicks",
+  "prob": 0.722,
+  "punti_casa": 112.8,
+  "punti_trasf": 110.0,
+  "giocatori": {
+   "Jalen Brunson": 27.0,
+   "James Harden": 32.0
+  }
+ },
+ "401909968": {
+  "data": "2026-11-11",
+  "casa": "Toronto Raptors",
+  "trasf": "Boston Celtics",
+  "favorita": "Boston Celtics",
+  "prob": 0.692,
+  "punti_casa": 109.4,
+  "punti_trasf": 114.6,
+  "giocatori": {
+   "Ja'Kobe Walter": 17.0,
+   "Jayson Tatum": 24.0
+  }
+ },
+ "401909969": {
+  "data": "2026-11-11",
+  "casa": "Chicago Bulls",
+  "trasf": "San Antonio Spurs",
+  "favorita": "San Antonio Spurs",
+  "prob": 0.855,
+  "punti_casa": 110.4,
+  "punti_trasf": 124.1,
+  "giocatori": {
+   "Jalen Smith": 23.0,
+   "Victor Wembanyama": 32.0
+  }
+ },
+ "401909970": {
+  "data": "2026-11-11",
+  "casa": "Memphis Grizzlies",
+  "trasf": "Denver Nuggets",
+  "favorita": "Memphis Grizzlies",
+  "prob": 0.59,
+  "punti_casa": 115.0,
+  "punti_trasf": 112.6,
+  "giocatori": {
+   "Ty Jerome": 22.0,
+   "Jamal Murray": 30.0
+  }
+ },
+ "401909971": {
+  "data": "2026-11-11",
+  "casa": "Milwaukee Bucks",
+  "trasf": "Los Angeles Lakers",
+  "favorita": "Los Angeles Lakers",
+  "prob": 0.691,
+  "punti_casa": 110.2,
+  "punti_trasf": 120.9,
+  "giocatori": {
+   "Tyler Herro": 27.0,
+   "Luka Doncic": 32.0
+  }
+ },
+ "401909972": {
+  "data": "2026-11-11",
+  "casa": "New Orleans Pelicans",
+  "trasf": "Brooklyn Nets",
+  "favorita": "New Orleans Pelicans",
+  "prob": 0.529,
+  "punti_casa": 116.4,
+  "punti_trasf": 114.5,
+  "giocatori": {
+   "Zion Williamson": 29.0,
+   "Michael Porter Jr.": 22.0
+  }
+ },
+ "401909973": {
+  "data": "2026-11-11",
+  "casa": "Utah Jazz",
+  "trasf": "Orlando Magic",
+  "favorita": "Orlando Magic",
+  "prob": 0.528,
+  "punti_casa": 110.7,
+  "punti_trasf": 112.0,
+  "giocatori": {
+   "Darryn Peterson": 22.0,
+   "Franz Wagner": 38.0
+  }
+ },
+ "401909974": {
+  "data": "2026-11-11",
+  "casa": "Houston Rockets",
+  "trasf": "Golden State Warriors",
+  "favorita": "Houston Rockets",
+  "prob": 0.546,
+  "punti_casa": 111.9,
+  "punti_trasf": 114.0,
+  "giocatori": {
+   "Kevin Durant": 20.0,
+   "Yaxel Lendeborg": 25.0
+  }
+ },
+ "401909975": {
+  "data": "2026-11-11",
+  "casa": "Portland Trail Blazers",
+  "trasf": "Oklahoma City Thunder",
+  "favorita": "Oklahoma City Thunder",
+  "prob": 0.522,
+  "punti_casa": 112.9,
+  "punti_trasf": 111.8,
+  "giocatori": {
+   "Deni Avdija": 28.0,
+   "Shai Gilgeous-Alexander": 31.0
+  }
  }
 }
