@@ -722,5 +722,70 @@
     "Scoot Henderson": 5.0
    }
   }
+ },
+ "401909980": {
+  "data": "2026-11-14",
+  "casa": "New Orleans Pelicans",
+  "trasf": "Denver Nuggets",
+  "favorita": "Denver Nuggets",
+  "prob": 0.635,
+  "punti_casa": 113.6,
+  "punti_trasf": 119.7,
+  "giocatori": {
+   "Zion Williamson": 21.7,
+   "Jamal Murray": 26.2
+  }
+ },
+ "401909981": {
+  "data": "2026-11-14",
+  "casa": "Cleveland Cavaliers",
+  "trasf": "Dallas Mavericks",
+  "favorita": "Dallas Mavericks",
+  "prob": 0.503,
+  "punti_casa": 113.6,
+  "punti_trasf": 113.6,
+  "giocatori": {
+   "Donovan Mitchell": 22.8,
+   "Cooper Flagg": 24.6
+  }
+ },
+ "401909982": {
+  "data": "2026-11-14",
+  "casa": "Miami Heat",
+  "trasf": "Detroit Pistons",
+  "favorita": "Detroit Pistons",
+  "prob": 0.595,
+  "punti_casa": 113.1,
+  "punti_trasf": 116.6,
+  "giocatori": {
+   "Giannis Antetokounmpo": 27.7,
+   "Cade Cunningham": 25.0
+  }
+ },
+ "401909983": {
+  "data": "2026-11-14",
+  "casa": "Memphis Grizzlies",
+  "trasf": "Brooklyn Nets",
+  "favorita": "Memphis Grizzlies",
+  "prob": 0.703,
+  "punti_casa": 118.2,
+  "punti_trasf": 112.0,
+  "giocatori": {
+   "Ty Jerome": 26.2,
+   "Michael Porter Jr.": 21.5
+  }
+ },
+ "401909984": {
+  "data": "2026-11-14",
+  "casa": "Minnesota Timberwolves",
+  "trasf": "Chicago Bulls",
+  "favorita": "Minnesota Timberwolves",
+  "prob": 0.846,
+  "punti_casa": 122.8,
+  "punti_trasf": 111.9,
+  "giocatori": {
+   "LaMelo Ball": 18.6,
+   "Norman Powell": 19.2
+  }
  }
 }
