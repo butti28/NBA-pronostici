@@ -787,5 +787,83 @@
    "LaMelo Ball": 18.6,
    "Norman Powell": 19.2
   }
+ },
+ "401910023": {
+  "data": "2026-11-21",
+  "casa": "Philadelphia 76ers",
+  "trasf": "Milwaukee Bucks",
+  "favorita": "Philadelphia 76ers",
+  "prob": 0.773,
+  "punti_casa": 118.0,
+  "punti_trasf": 110.4,
+  "giocatori": {
+   "Tyrese Maxey": 26.5,
+   "Tyler Herro": 19.4
+  }
+ },
+ "401910024": {
+  "data": "2026-11-21",
+  "casa": "New York Knicks",
+  "trasf": "Portland Trail Blazers",
+  "favorita": "New York Knicks",
+  "prob": 0.596,
+  "punti_casa": 110.8,
+  "punti_trasf": 108.2,
+  "giocatori": {
+   "Jalen Brunson": 26.6,
+   "Deni Avdija": 24.2
+  }
+ },
+ "401910025": {
+  "data": "2026-11-21",
+  "casa": "Dallas Mavericks",
+  "trasf": "LA Clippers",
+  "favorita": "Dallas Mavericks",
+  "prob": 0.612,
+  "punti_casa": 116.8,
+  "punti_trasf": 114.0,
+  "giocatori": {
+   "Cooper Flagg": 24.2,
+   "Darius Garland": 21.3
+  }
+ },
+ "401910026": {
+  "data": "2026-11-21",
+  "casa": "Minnesota Timberwolves",
+  "trasf": "Memphis Grizzlies",
+  "favorita": "Minnesota Timberwolves",
+  "prob": 0.552,
+  "punti_casa": 113.8,
+  "punti_trasf": 114.0,
+  "giocatori": {
+   "Ayo Dosunmu": 17.8,
+   "Cedric Coward": 14.8
+  }
+ },
+ "401910027": {
+  "data": "2026-11-21",
+  "casa": "San Antonio Spurs",
+  "trasf": "New Orleans Pelicans",
+  "favorita": "San Antonio Spurs",
+  "prob": 0.833,
+  "punti_casa": 121.3,
+  "punti_trasf": 107.6,
+  "giocatori": {
+   "Victor Wembanyama": 28.6,
+   "Zion Williamson": 21.7
+  }
+ },
+ "401910028": {
+  "data": "2026-11-21",
+  "casa": "Sacramento Kings",
+  "trasf": "Boston Celtics",
+  "favorita": "Boston Celtics",
+  "prob": 0.759,
+  "punti_casa": 102.7,
+  "punti_trasf": 114.0,
+  "giocatori": {
+   "Darius Acuff Jr.": 26.2,
+   "Jayson Tatum": 26.4
+  }
  }
 }
