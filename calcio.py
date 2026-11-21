@@ -21,7 +21,8 @@ CAMPIONATI = {
     "Amichevoli (nazionali)": "fifa.friendly",
 }
 
-GIORNI_STORICO = 400
+GIORNI_STORICO = 200
+ULTIME_PARTITE = 6
 
 
 def chiama(lega, data_str):
@@ -30,25 +31,18 @@ def chiama(lega, data_str):
     return r.json().get("events", [])
 
 
-def gol_squadra(c):
-    try:
-        return float(c.get("score"))
-    except Exception:
-        return None
-
-
 @st.cache_data(ttl=6 * 3600, show_spinner=False)
-def partite_passate(lega, fine_str, giorni):
+def partite_concluse(lega, fine_str, giorni):
     fine = datetime.strptime(fine_str, "%Y%m%d")
     inizio = fine - timedelta(days=giorni)
     intervallo = f"{inizio.strftime('%Y%m%d')}-{(fine - timedelta(days=1)).strftime('%Y%m%d')}"
-    righe = []
     try:
-        r = requests.get(f"{BASE}/{lega}/scoreboard", params={"dates": intervallo, "limit": 1000}, timeout=30)
+        r = requests.get(f"{BASE}/{lega}/scoreboard", params={"dates": intervallo, "limit": 1000}, timeout=40)
         r.raise_for_status()
         eventi = r.json().get("events", [])
     except Exception:
-        return righe
+        return []
+    righe = []
     for e in eventi:
         comp = e["competitions"][0]
         if not comp["status"]["type"].get("completed"):
@@ -58,132 +52,117 @@ def partite_passate(lega, fine_str, giorni):
         trasf = next((c for c in sq if c["homeAway"] == "away"), None)
         if not casa or not trasf:
             continue
-        gc, gt = gol_squadra(casa), gol_squadra(trasf)
-        if gc is None or gt is None:
-            continue
-        righe.append({"casa": casa["team"]["displayName"], "trasf": trasf["team"]["displayName"], "gc": gc, "gt": gt})
+        righe.append({
+            "id": str(e["id"]),
+            "data": e.get("date", ""),
+            "casa": casa["team"]["displayName"],
+            "trasf": trasf["team"]["displayName"],
+        })
+    righe.sort(key=lambda r: r["data"])
     return righe
 
 
-def forza_squadre(righe):
-    """Gol segnati e subiti medi in casa e fuori, e media del campionato."""
-    if not righe:
-        return None
-    tot_c = sum(r["gc"] for r in righe) / len(righe)
-    tot_t = sum(r["gt"] for r in righe) / len(righe)
+@st.cache_data(ttl=24 * 3600, show_spinner=False)
+def dettaglio_partita(lega, event_id):
+    """Tiri in porta per squadra e per giocatore in una partita conclusa."""
+    vuoto = {"squadre": {}, "giocatori": {}}
+    try:
+        r = requests.get(f"{BASE}/{lega}/summary", params={"event": event_id}, timeout=20)
+        r.raise_for_status()
+        j = r.json()
+    except Exception:
+        return vuoto
+
     squadre = {}
-    for r in righe:
-        s = squadre.setdefault(r["casa"], {"cf": 0, "cs": 0, "cn": 0, "tf": 0, "ts": 0, "tn": 0})
-        s["cf"] += r["gc"]; s["cs"] += r["gt"]; s["cn"] += 1
-        s = squadre.setdefault(r["trasf"], {"cf": 0, "cs": 0, "cn": 0, "tf": 0, "ts": 0, "tn": 0})
-        s["tf"] += r["gt"]; s["ts"] += r["gc"]; s["tn"] += 1
-    return tot_c, tot_t, squadre
+    for sq in j.get("boxscore", {}).get("teams", []) or []:
+        nome = sq.get("team", {}).get("displayName")
+        for s in sq.get("statistics", []) or []:
+            if s.get("name") == "shotsOnTarget":
+                try:
+                    squadre[nome] = float(s.get("displayValue"))
+                except Exception:
+                    pass
+
+    giocatori = {}
+    for ro in j.get("rosters", []) or []:
+        nome_sq = ro.get("team", {}).get("displayName")
+        righe = []
+        for g in ro.get("roster", []) or []:
+            nome = g.get("athlete", {}).get("displayName")
+            if not nome:
+                continue
+            stats = {s.get("name"): s.get("displayValue") for s in (g.get("stats", []) or [])}
+            app = stats.get("appearances")
+            ha_giocato = bool(g.get("starter")) or bool(g.get("subbedIn")) or (app not in (None, "", "0", "0.0"))
+            if ha_giocato:
+                righe.append((nome, stats))
+        trovato = any("shotsOnTarget" in stt for _, stt in righe)
+        if not trovato or not nome_sq:
+            continue
+        elenco = {}
+        for nome, stt in righe:
+            try:
+                elenco[nome] = float(stt.get("shotsOnTarget", 0) or 0)
+            except Exception:
+                elenco[nome] = 0.0
+        giocatori[nome_sq] = elenco
+        if nome_sq not in squadre:
+            squadre[nome_sq] = sum(elenco.values())
+
+    return {"squadre": squadre, "giocatori": giocatori}
 
 
-def poisson(k, media):
-    return math.exp(-media) * media ** k / math.factorial(k)
+def ultime_partite(partite, squadra):
+    return [p for p in partite if squadra in (p["casa"], p["trasf"])][-ULTIME_PARTITE:]
 
 
-def previsione(forza, casa, trasf):
-    if not forza:
+def stima_squadra(lega, partite, squadra):
+    fatti = []
+    subiti = []
+    for p in ultime_partite(partite, squadra):
+        t = dettaglio_partita(lega, p["id"])["squadre"]
+        altra = p["trasf"] if p["casa"] == squadra else p["casa"]
+        if squadra in t and altra in t:
+            fatti.append(t[squadra])
+            subiti.append(t[altra])
+    if len(fatti) < 2:
         return None
-    media_c, media_t, squadre = forza
-    a, b = squadre.get(casa), squadre.get(trasf)
-    if not a or not b or a["cn"] + a["tn"] < 2 or b["cn"] + b["tn"] < 2:
-        return None
-    davanti.
-    cn_a, tn_a = max(a["cn"], 1), max(a["tn"], 1)
-    cn_b, tn_b = max(b["cn"], 1), max(b["tn"], 1)
-    att_c = ((a["cf"] + a["tf"]) / max(a["cn"] + a["tn"], 1)) / ((media_c + media_t) / 2)
-    dif_c = ((a["cs"] + a["ts"]) / max(a["cn"] + a["tn"], 1)) / ((media_c + media_t) / 2)
-    att_t = ((b["cf"] + b["tf"]) / max(b["cn"] + b["tn"], 1)) / ((media_c + media_t) / 2)
-    dif_t = ((b["cs"] + b["ts"]) / max(b["cn"] + b["tn"], 1)) / ((media_c + media_t) / 2)
-    lam_c = max(0.2, att_c * dif_t * media_c)
-    lam_t = max(0.2, att_t * dif_c * media_t)
-    p1 = px = p2 = 0.0
-    esatti = []
-    for i in range(0, 8):
-        for j in range(0, 8):
-            p = poisson(i, lam_c) * poisson(j, lam_t)
-            esatti.append(((i, j), p))
-            if i > j:
-                p1 += p
-            elif i == j:
-                px += p
-            else:
-                p2 += p
-    somma = p1 + px + p2
-    esatti.sort(key=lambda x: x[1], reverse=True)
-    over25 = sum(p for (i, j), p in esatti if i + j > 2) / somma
-    gol_gol = (1 - poisson(0, lam_c)) * (1 - poisson(0, lam_t))
     return {
-        "p1": p1 / somma, "px": px / somma, "p2": p2 / somma,
-        "lam_c": lam_c, "lam_t": lam_t,
-        "esatti": [(f"{i}-{j}", p / somma) for (i, j), p in esatti[:3]],
-        "over25": over25, "gol_gol": gol_gol,
+        "fatti": sum(fatti) / len(fatti),
+        "subiti": sum(subiti) / len(subiti),
+        "n": len(fatti),
     }
 
 
-@st.cache_data(ttl=6 * 3600, show_spinner=False)
-def marcatori_squadra(lega, team_id):
-    """Migliori marcatori di stagione della squadra, se ESPN li fornisce."""
-    elenco = []
-    try:
-        r = requests.get(f"{BASE}/{lega}/teams/{team_id}/leaders", timeout=20)
-        r.raise_for_status()
-        dati = r.json()
-        categorie = dati.get("leaders", {}).get("categories", []) or dati.get("categories", [])
-        for cat in categorie:
-            if cat.get("name", "") in ("goals", "totalGoals", "goalsPerGame"):
-                for x in cat.get("leaders", [])[:3]:
-                    elenco.append((x.get("athlete", {}).get("displayName", "n.d."), x.get("displayValue", "")))
-    except Exception:
-        pass
-    return elenco
-
-
-def marcatori_dalla_partita(competitor):
-    elenco = []
-    for cat in competitor.get("leaders", []) or []:
-        if cat.get("name", "") in ("goals", "totalGoals", "goalsPerGame"):
-            for x in cat.get("leaders", [])[:3]:
-                elenco.append((x.get("athlete", {}).get("displayName", "n.d."), x.get("displayValue", "")))
-    return elenco
-
-
-@st.cache_data(ttl=6 * 3600, show_spinner=False)
-def cartellini_medi(lega, fine_str, giorni):
-    """Stima i cartellini medi per squadra dalle ultime partite concluse."""
-    fine = datetime.strptime(fine_str, "%Y%m%d")
-    inizio = fine - timedelta(days=giorni)
-    intervallo = f"{inizio.strftime('%Y%m%d')}-{(fine - timedelta(days=1)).strftime('%Y%m%d')}"
-    totali = {}
-    try:
-        r = requests.get(f"{BASE}/{lega}/scoreboard", params={"dates": intervallo, "limit": 1000}, timeout=30)
-        r.raise_for_status()
-        eventi = r.json().get("events", [])
-    except Exception:
-        return {}
-    for e in eventi:
-        comp = e["competitions"][0]
-        if not comp["status"]["type"].get("completed"):
-            continue
-        for c in comp["competitors"]:
-            nome = c["team"]["displayName"]
-            gialli = 0
-            for s in c.get("statistics", []) or []:
-                if s.get("name") == "yellowCards":
-                    try:
-                        gialli = float(s.get("displayValue", 0))
-                    except Exception:
-                        gialli = 0
-            t = totali.setdefault(nome, [0.0, 0])
-            t[0] += gialli
+def giocatori_squadra(lega, partite, squadra):
+    """I tre giocatori con più tiri in porta di media nelle ultime partite."""
+    tot = {}
+    for p in ultime_partite(partite, squadra):
+        elenco = dettaglio_partita(lega, p["id"])["giocatori"].get(squadra, {})
+        for nome, sot in elenco.items():
+            t = tot.setdefault(nome, [0.0, 0])
+            t[0] += sot
             t[1] += 1
-    return {n: (v[0] / v[1]) for n, v in totali.items() if v[1] >= 2}
+    risultato = []
+    for nome, valori in tot.items():
+        somma, n = valori
+        if n >= 2:
+            risultato.append((nome, somma / n, n))
+    risultato.sort(key=lambda x: x[1], reverse=True)
+    return risultato[:3]
+
+
+def prob_over(media, soglia):
+    """Probabilità di fare almeno soglia + 1 tiri (soglia 3 significa over 3.5)."""
+    cum = 0.0
+    for k in range(0, soglia + 1):
+        cum += math.exp(-media) * media ** k / math.factorial(k)
+    return 1 - cum
+
+
 def mostra_calcio():
-    st.subheader("⚽ Pronostici Calcio")
-    st.caption("Stime statistiche indicative, soprattutto per risultato esatto, marcatori e cartellini. Non garantiscono vincite.")
+    st.subheader("🎯 Pronostici tiri in porta")
+    st.caption("Stime basate sugli ultimi incontri. Sono indicative e non garantiscono vincite.")
 
     nome_lega = st.selectbox("Campionato", list(CAMPIONATI.keys()))
     lega = CAMPIONATI[nome_lega]
@@ -192,11 +171,9 @@ def mostra_calcio():
     giorno_str = data_scelta.strftime("%Y%m%d")
 
     try:
-        with st.spinner("Carico partite e statistiche..."):
+        with st.spinner("Carico il calendario..."):
             eventi = chiama(lega, giorno_str)
-            righe = partite_passate(lega, giorno_str, GIORNI_STORICO)
-            forza = forza_squadre(righe)
-            gialli = cartellini_medi(lega, giorno_str, GIORNI_STORICO)
+            partite = partite_concluse(lega, giorno_str, GIORNI_STORICO)
     except Exception as e:
         st.error("Non riesco a scaricare i dati in questo momento. Riprova tra poco.")
         st.caption(f"Dettaglio tecnico: {e}")
@@ -214,57 +191,60 @@ def mostra_calcio():
         t_ = next((x for x in sq if x["homeAway"] == "away"), None)
         if not c or not t_:
             continue
-        casa, trasf = c["team"]["displayName"], t_["team"]["displayName"]
+        casa = c["team"]["displayName"]
+        trasf = t_["team"]["displayName"]
         stato_gara = comp["status"]["type"].get("shortDetail", "")
-        pr = previsione(forza, casa, trasf)
 
-        if not pr:
-            with st.expander(f"⚽ {casa} - {trasf}  |  {stato_gara}"):
-                st.write("Dati insufficienti per questa partita (poche partite giocate dalle squadre).")
-            continue
+        with st.expander(f"🎯 {casa} - {trasf}  |  {stato_gara}"):
+            if not st.toggle("Calcola i tiri in porta", key=f"sot_{e['id']}"):
+                st.caption("Accendi l'interruttore per calcolare: la prima volta ci mette qualche secondo.")
+                continue
 
-        esiti = {"1 (vince " + casa + ")": pr["p1"], "X (pareggio)": pr["px"], "2 (vince " + trasf + ")": pr["p2"]}
-        migliore = max(esiti, key=esiti.get)
+            with st.spinner("Calcolo..."):
+                a = stima_squadra(lega, partite, casa)
+                b = stima_squadra(lega, partite, trasf)
 
-        with st.expander(f"⚽ {casa} - {trasf}  |  {stato_gara}  |  Segno: {migliore.split(' ')[0]} {esiti[migliore] * 100:.0f}%"):
+            if not a or not b:
+                st.write("Dati sui tiri in porta non disponibili per una delle due squadre in questa competizione.")
+                continue
+
+            att_c = (a["fatti"] + b["subiti"]) / 2
+            att_t = (b["fatti"] + a["subiti"]) / 2
+
             k1, k2, k3 = st.columns(3)
-            k1.metric("1", f"{pr['p1'] * 100:.0f}%")
-            k2.metric("X", f"{pr['px'] * 100:.0f}%")
-            k3.metric("2", f"{pr['p2'] * 100:.0f}%")
-            st.write(f"Quote eque: 1 = {1 / pr['p1']:.2f}  |  X = {1 / pr['px']:.2f}  |  2 = {1 / pr['p2']:.2f}")
+            k1.metric(casa, f"{att_c:.1f}")
+            k2.metric(trasf, f"{att_t:.1f}")
+            k3.metric("Totale", f"{att_c + att_t:.1f}")
+            st.caption("Tiri in porta attesi.")
 
-            quote = comp.get("odds")
-            if quote:
-                q = quote[0]
-                st.markdown("**Quote del bookmaker (ESPN)**")
-                if q.get("details"):
-                    st.write(f"Handicap: {q['details']}")
-                if q.get("overUnder"):
-                    st.write(f"Over/under gol: {q['overUnder']}")
+            st.markdown("**Squadre: probabilità di superare la soglia (stima)**")
+            for nome, media in [(casa, att_c), (trasf, att_t)]:
+                st.write(
+                    f"{nome}: oltre 2.5 = {prob_over(media, 2) * 100:.0f}%  |  "
+                    f"oltre 3.5 = {prob_over(media, 3) * 100:.0f}%  |  "
+                    f"oltre 4.5 = {prob_over(media, 4) * 100:.0f}%"
+                )
+            tot = att_c + att_t
+            st.write(
+                f"Totale partita: oltre 6.5 = {prob_over(tot, 6) * 100:.0f}%  |  "
+                f"oltre 8.5 = {prob_over(tot, 8) * 100:.0f}%"
+            )
 
-            st.markdown("**Risultati esatti più probabili**")
-            for ris, p in pr["esatti"]:
-                st.write(f"{ris}: {p * 100:.1f}%")
-            st.caption("Anche il risultato esatto più probabile esce raramente.")
+            st.markdown("### 🔥 Giocatori: tiri in porta")
+            for nome_sq, dati_sq, attesi in [(casa, a, att_c), (trasf, b, att_t)]:
+                st.markdown(f"**{nome_sq}**")
+                gioc = giocatori_squadra(lega, partite, nome_sq)
+                if not gioc:
+                    st.write("Dati sui giocatori non disponibili.")
+                    continue
+                fattore = attesi / dati_sq["fatti"] if dati_sq["fatti"] > 0 else 1.0
+                fattore = min(max(fattore, 0.6), 1.5)
+                for nome, media, n in gioc:
+                    m = media * fattore
+                    p1 = 1 - math.exp(-m)
+                    st.write(
+                        f"{nome}: {m:.1f} attesi  |  almeno 1 tiro in porta {p1 * 100:.0f}%  |  "
+                        f"media {media:.1f} in {n} partite"
+                    )
 
-            st.write(f"Gol attesi: {casa} {pr['lam_c']:.1f}  |  {trasf} {pr['lam_t']:.1f}")
-            st.write(f"Over 2.5 gol: {pr['over25'] * 100:.0f}%  |  Gol-gol (segnano entrambe): {pr['gol_gol'] * 100:.0f}%")
-
-            st.markdown("**⭐ Marcatori da seguire**")
-            for nome_sq, comp_sq in [(casa, c), (trasf, t_)]:
-                elenco = marcatori_squadra(lega, comp_sq["team"]["id"])
-                if not elenco:
-                    elenco = marcatori_dalla_partita(comp_sq)
-                if elenco:
-                    st.write(f"{nome_sq}: " + "  |  ".join(f"{n} ({v})" for n, v in elenco))
-                else:
-                    st.write(f"{nome_sq}: dati non disponibili")
-
-            st.markdown("**🟨 Cartellini (stima)**")
-            gc, gt = gialli.get(casa), gialli.get(trasf)
-            if gc is not None and gt is not None:
-                st.write(f"Gialli medi: {casa} {gc:.1f}  |  {trasf} {gt:.1f}  |  Totale stimato circa {gc + gt:.1f}")
-            else:
-                st.write("Dati sui cartellini non disponibili per questa partita.")
-
-            st.caption("Gioca solo se la quota del bookmaker supera la quota equa. Controlla infortuni e squalifiche.")
+            st.caption("Non considera formazioni, infortuni, rigoristi e squalifiche. Controlla sempre prima di giocare.")
