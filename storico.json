@@ -865,5 +865,148 @@
    "Darius Acuff Jr.": 26.2,
    "Jayson Tatum": 26.4
   }
+ },
+ "401909326": {
+  "data": "2026-11-27",
+  "casa": "New York Knicks",
+  "trasf": "Miami Heat",
+  "favorita": "New York Knicks",
+  "prob": 0.563,
+  "punti_casa": 112.4,
+  "punti_trasf": 111.2,
+  "giocatori": {
+   "Jalen Brunson": 26.1,
+   "Giannis Antetokounmpo": 28.4
+  }
+ },
+ "401909327": {
+  "data": "2026-11-27",
+  "casa": "Detroit Pistons",
+  "trasf": "Milwaukee Bucks",
+  "favorita": "Detroit Pistons",
+  "prob": 0.71,
+  "punti_casa": 116.0,
+  "punti_trasf": 110.3,
+  "giocatori": {
+   "Cade Cunningham": 24.2,
+   "Tyler Herro": 22.3
+  }
+ },
+ "401909328": {
+  "data": "2026-11-27",
+  "casa": "Indiana Pacers",
+  "trasf": "Philadelphia 76ers",
+  "favorita": "Philadelphia 76ers",
+  "prob": 0.57,
+  "punti_casa": 116.4,
+  "punti_trasf": 117.2,
+  "giocatori": {
+   "Pascal Siakam": 22.9,
+   "Tyrese Maxey": 25.9
+  }
+ },
+ "401909329": {
+  "data": "2026-11-27",
+  "casa": "Toronto Raptors",
+  "trasf": "Brooklyn Nets",
+  "favorita": "Toronto Raptors",
+  "prob": 0.515,
+  "punti_casa": 114.2,
+  "punti_trasf": 113.1,
+  "giocatori": {
+   "Scottie Barnes": 24.8,
+   "Julius Randle": 21.9
+  }
+ },
+ "401909330": {
+  "data": "2026-11-27",
+  "casa": "Boston Celtics",
+  "trasf": "Atlanta Hawks",
+  "favorita": "Boston Celtics",
+  "prob": 0.56,
+  "punti_casa": 111.6,
+  "punti_trasf": 107.8,
+  "giocatori": {
+   "Jayson Tatum": 27.3,
+   "Nickeil Alexander-Walker": 21.3
+  }
+ },
+ "401909331": {
+  "data": "2026-11-27",
+  "casa": "Minnesota Timberwolves",
+  "trasf": "Memphis Grizzlies",
+  "favorita": "Minnesota Timberwolves",
+  "prob": 0.525,
+  "punti_casa": 111.8,
+  "punti_trasf": 113.1,
+  "giocatori": {
+   "Jaden McDaniels": 19.2,
+   "Ty Jerome": 24.5
+  }
+ },
+ "401909332": {
+  "data": "2026-11-27",
+  "casa": "Phoenix Suns",
+  "trasf": "Dallas Mavericks",
+  "favorita": "Phoenix Suns",
+  "prob": 0.558,
+  "punti_casa": 112.6,
+  "punti_trasf": 112.0,
+  "giocatori": {
+   "Devin Booker": 24.5,
+   "Cooper Flagg": 24.3
+  }
+ },
+ "401909333": {
+  "data": "2026-11-27",
+  "casa": "San Antonio Spurs",
+  "trasf": "Los Angeles Lakers",
+  "favorita": "San Antonio Spurs",
+  "prob": 0.581,
+  "punti_casa": 113.8,
+  "punti_trasf": 110.2,
+  "giocatori": {
+   "Victor Wembanyama": 30.7,
+   "Luka Doncic": 36.6
+  }
+ },
+ "401909334": {
+  "data": "2026-11-27",
+  "casa": "Utah Jazz",
+  "trasf": "Denver Nuggets",
+  "favorita": "Denver Nuggets",
+  "prob": 0.645,
+  "punti_casa": 112.0,
+  "punti_trasf": 115.2,
+  "giocatori": {
+   "Keyonte George": 20.4,
+   "Jamal Murray": 25.8
+  }
+ },
+ "401909335": {
+  "data": "2026-11-27",
+  "casa": "LA Clippers",
+  "trasf": "New Orleans Pelicans",
+  "favorita": "LA Clippers",
+  "prob": 0.67,
+  "punti_casa": 118.5,
+  "punti_trasf": 114.0,
+  "giocatori": {
+   "Darius Garland": 20.7,
+   "Zion Williamson": 21.9
+  }
+ },
+ "401909336": {
+  "data": "2026-11-27",
+  "casa": "Portland Trail Blazers",
+  "trasf": "Golden State Warriors",
+  "favorita": "Portland Trail Blazers",
+  "prob": 0.608,
+  "punti_casa": 111.4,
+  "punti_trasf": 108.4,
+  "giocatori": {
+   "Deni Avdija": 24.9,
+   "Yaxel Lendeborg": 19.0
+  }
  }
 }
