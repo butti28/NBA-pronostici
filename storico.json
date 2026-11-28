@@ -1008,5 +1008,70 @@
    "Deni Avdija": 24.9,
    "Yaxel Lendeborg": 19.0
   }
+ },
+ "401910046": {
+  "data": "2026-11-28",
+  "casa": "Washington Wizards",
+  "trasf": "Orlando Magic",
+  "favorita": "Orlando Magic",
+  "prob": 0.569,
+  "punti_casa": 110.3,
+  "punti_trasf": 114.2,
+  "giocatori": {
+   "Anthony Davis": 25.6,
+   "Franz Wagner": 24.2
+  }
+ },
+ "401910047": {
+  "data": "2026-11-28",
+  "casa": "Charlotte Hornets",
+  "trasf": "Brooklyn Nets",
+  "favorita": "Brooklyn Nets",
+  "prob": 0.515,
+  "punti_casa": 113.4,
+  "punti_trasf": 113.3,
+  "giocatori": {
+   "Brandon Miller": 20.9,
+   "Julius Randle": 21.9
+  }
+ },
+ "401910048": {
+  "data": "2026-11-28",
+  "casa": "Chicago Bulls",
+  "trasf": "Indiana Pacers",
+  "favorita": "Chicago Bulls",
+  "prob": 0.653,
+  "punti_casa": 118.4,
+  "punti_trasf": 113.9,
+  "giocatori": {
+   "Matas Buzelis": 15.6,
+   "Pascal Siakam": 22.9
+  }
+ },
+ "401910049": {
+  "data": "2026-11-28",
+  "casa": "Milwaukee Bucks",
+  "trasf": "Oklahoma City Thunder",
+  "favorita": "Oklahoma City Thunder",
+  "prob": 0.594,
+  "punti_casa": 110.8,
+  "punti_trasf": 116.0,
+  "giocatori": {
+   "Tyler Herro": 22.3,
+   "Shai Gilgeous-Alexander": 32.1
+  }
+ },
+ "401910050": {
+  "data": "2026-11-28",
+  "casa": "Houston Rockets",
+  "trasf": "Philadelphia 76ers",
+  "favorita": "Houston Rockets",
+  "prob": 0.511,
+  "punti_casa": 117.4,
+  "punti_trasf": 116.2,
+  "giocatori": {
+   "Alperen Sengun": 22.0,
+   "Tyrese Maxey": 25.9
+  }
  }
 }
